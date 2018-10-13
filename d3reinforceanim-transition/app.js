@@ -31,6 +31,15 @@ var y_scale         =   d3.scaleLinear()
     })])
     .range([ chart_height - padding, padding ]);
 
+//Clip Paths
+svg.append('clipPath')
+    .attr('id', 'plot-area-clip-path')
+    .append('rect')
+    .attr('x', padding)
+    .attr('y', padding)
+    .attr('width', chart_width - padding * 3)
+    .attr('height', chart_height - padding * 2)
+
 // Create Axis
 var x_axis          =   d3.axisBottom( x_scale );
 
@@ -54,7 +63,10 @@ svg.append( 'g' )
     .call( y_axis );
 
 // Create Circles
-svg.selectAll( 'circle' )
+svg.append('g')
+    .attr('id', 'plot-area')
+    .attr('clip-path', 'url(#plot-area-clip-path)')
+    .selectAll( 'circle' )
     .data( data )
     .enter()
     .append( 'circle' )
@@ -89,16 +101,49 @@ d3.select('button')
             return d[1];
         })]);
 
+        var colors = [
+            '#F26D6D',
+            '#1E6190',
+            '#7559D9',
+            '#D1AB03'
+        ];
+        var color_index = Math.floor(
+            Math.random() * colors.length
+        );
+
+        //Group the circles here so that clip path can optimally be applied to group rather than each circle individually
         svg.selectAll('circle')
             .data(data)
             .transition()
             .duration(1000)
+            //Arrow functions can't be used when using this within the scope because they inherit their scoping of this, which breaks the function
+            // .on('start', function() {
+            //     d3.select(this)//returns current circle being animated
+            //         //You can have multiple transitions happen at the same time around the chart but you can't apply multiple transitions to the same element at the same time. This problem occurs in only start and not end events due to the transitions being over by the end event.
+            //         // .transition()
+            //         .attr('fill', '#F26D2D');
+            // })
             .attr("cx", function(d) {
                 return x_scale(d[0]);
             })
             .attr("cy", function(d) {
                 return y_scale(d[1]);
-            });
+            })
+            // .on('end', function() {
+            //     var colors = [
+            //         '#F26D6D',
+            //         '#1E6190',
+            //         '#7559D9',
+            //         '#D1AB03'
+            //     ];
+            //     var color_index = Math.floor(
+            //         Math.random() * colors.length
+            //     );
+
+                // d3.select(this) //returns current circle being animated
+            .transition()//First transition will handle all of the change up until the second transition
+            .attr('fill', colors[color_index]);
+            // });
 
         //Update Axis
         svg.select('.x-axis')
