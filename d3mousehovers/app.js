@@ -3,6 +3,7 @@ var data            =   [6,20,21,14,2,30,7,16,25,5,11,28,10,26,9];
 // Create SVG Element
 var chart_width     =   800;
 var chart_height    =   400;
+var sort_flag = false;
 var svg             =   d3.select( '#chart' )
     .append( 'svg' )
     .attr( 'width', chart_width )
@@ -34,22 +35,24 @@ svg.selectAll( 'rect' )
     .attr( 'height', function( d ){
         return y_scale( d );
     })
-    .attr( 'fill', '#7ED26D' );
-
-// Create Labels
-svg.selectAll( 'text' )
-    .data(data)
-    .enter()
-    .append( 'text' )
-    .text(function( d ){
-        return d;
+    .attr( 'fill', '#7ED26D' )
+    // .append('title')
+    // .text((d) => {
+    //     return d;
+    // });
+    .on('mouseover', function(d){
+        //This will grab the current elements x attribute for you
+        var x = parseFloat(d3.select(this).attr('x')) +
+            x_scale.bandwidth() / 2;
+        var y = parseFloat(d3.select(this).attr('y')) /
+                2 + chart_height / 2;
+        d3.select('#tooltip')
+            .style('left', x + 'px')
+            .style('top', y + 'px')
+            .style('display', 'block')
+            .text(d);
     })
-    .attr( 'x', function( d, i ){
-        return x_scale( i ) + x_scale.bandwidth() / 2;
-    })
-    .attr( 'y', function(d ){
-        return chart_height - y_scale(d) + 15;
-    })
-    .attr( 'font-size', 14 )
-    .attr( 'fill', '#fff' )
-    .attr( 'text-anchor', 'middle' );
+    .on('mouseout', () => {
+        d3.select('#tooltip')
+            .style('display', 'none');
+    });

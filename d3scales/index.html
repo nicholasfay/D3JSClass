@@ -12,8 +12,10 @@
         // range ( min of pixels in view, max of pixels in view)
         var slices = [100,200,300,400,500]
         var scale = d3.scaleLinear()
-                    .domain([d3.min(slices), d3.max(slices)])
+                    .domain(d3.extent(slices))
                     .range([10,350]);
+
+        //can also use scale.invert if you ever wanted to invert the scales values
     </script>
 </body>
 </html>
